@@ -17,7 +17,7 @@
  
  */
 __global__
-void im2Gray_share(uchar4 *d_in, unsigned char *d_gray, int numRows, int numCols, int TILE WIDTH){
+void im2Gray_share(uchar4 *d_in, unsigned char *d_gray, int numRows, int numCols, int TILE_WIDTH){
 	
 }
 
