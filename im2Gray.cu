@@ -65,7 +65,7 @@ void launch_im2gray(uchar4 *d_in, unsigned char* d_grey, size_t numRows, size_t 
     dim3 block(x_thread,y_thread,1);
     dim3 grid(ceil(grid_x),ceil(grid_y), 1);
 
-    im2Gray<<<grid,block>>>(d_in, d_grey, numRows, numCols);
+    im2Gray_share<<<grid,block>>>(d_in, d_grey, numRows, numCols);
     cudaDeviceSynchronize();
     checkCudaErrors(cudaGetLastError());
     
