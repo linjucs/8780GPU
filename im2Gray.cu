@@ -1,6 +1,7 @@
 #include "im2Gray.h"
 
 #define BLOCK 32
+#define TILE_WITH 32
 
 
 
@@ -16,10 +17,25 @@
   you may vary the BLOCK parameter.
  
  */
+
 __global__
-void im2Gray_share(uchar4 *d_in, unsigned char *d_gray, int numRows, int numCols, int TILE_WIDTH){
-	
+void im2Gray_share(uchar4 *d_in, unsigned char *d_gray, int numRows, int numCols){
+	 __shared__ uchar4 r[TILE_WITH][TILE_WITH];
+  //__shared__ int c[TILE_WIDTH];
+  int x = threadIdx.x+blockIdx.x*blockDim.x;
+  int y = threadIdx.y+blockIdx.y*blockDim.y;
+  int tx = threadIdx.x;
+  int ty = threadIdx.y;
+  if (y < numRows && x < numCols){
+  int w = x+y*numRows;
+  r[tx][ty] = d_in[w];
+  uchar4 imagePoint = r[tx][ty];
+  d_gray[w] = .299f*imagePoint.x + .587f*imagePoint.y  + .114f*imagePoint.z;
+  __syncthreads();
+  }
+
 }
+
 
 __global__ 
 void im2Gray(uchar4 *d_in, unsigned char *d_gray, int numRows, int numCols){
@@ -42,8 +58,8 @@ void im2Gray(uchar4 *d_in, unsigned char *d_gray, int numRows, int numCols){
 
 void launch_im2gray(uchar4 *d_in, unsigned char* d_grey, size_t numRows, size_t numCols){
     // configure launch params here 
-    int x_thread = 32;
-    int y_thread = 32;
+    int x_thread = TILE_WITH;
+    int y_thread = TILE_WITH;
     int grid_x = numCols/x_thread;
     int grid_y = numRows/y_thread; 
     dim3 block(x_thread,y_thread,1);
